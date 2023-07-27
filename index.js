@@ -3,14 +3,24 @@ const { setupTracing } = require('./openTelemetry');
 
 const tracer = setupTracing('ob-ks-opentelemetry');
 
+// eslint-disable-next-line import/order
 const express = require('express');
 
 const app = express();
 
 const port = 3000;
 
+const randomApis = [
+  'https://catfact.ninja/fact',
+  'https://api.chucknorris.io/jokes/random',
+  'https://official-joke-api.appspot.com/random_joke',
+  'https://api.kanye.rest/',
+  'https://ifconfig.me/all.json',
+];
+
 app.get('/', async (req, res) => {
-  const span = tracer.startSpan('client.makeRequest()', {
+  const randomApiToUse = randomApis[Math.floor(Math.random() * randomApis.length)];
+  const span = tracer.startSpan(`client.makeRequest(${randomApiToUse.split('/')[2]})`, {
     kind: api.SpanKind.CLIENT,
   });
 
@@ -18,7 +28,7 @@ app.get('/', async (req, res) => {
 
   api.context.with(api.trace.setSpan(api.ROOT_CONTEXT, span), async () => {
     try {
-      result = await await fetch('https://ifconfig.me/all.json', {
+      result = await await fetch(randomApiToUse, {
         method: 'GET',
         headers: {
         },
@@ -26,7 +36,7 @@ app.get('/', async (req, res) => {
 
       span.addEvent('Retrieving something to generate noise', {
         'log.severity': 'debug',
-        'log.message': 'Retrieved all.json',
+        'log.message': `Retrieving data from ${randomApiToUse}`,
       });
       span.setStatus({ code: api.SpanStatusCode.OK });
     } catch (e) {
@@ -45,10 +55,20 @@ app.get('/', async (req, res) => {
         if (result.ok) {
           const resultText = await result.json();
           res.send(resultText);
+          resultSpan.addEvent(`Fetch result from: ${randomApiToUse}`, {
+            'log.severity': 'debug',
+            'log.message': JSON.stringify(resultText),
+          });
           resultSpan.setStatus({ code: api.SpanStatusCode.OK });
         } else {
           res.status(500);
           res.send('Error');
+
+          resultSpan.addEvent(`Fetch failed ${randomApiToUse}`, {
+            'log.severity': 'error',
+            'log.message': await result.text(),
+          });
+
           resultSpan.setStatus({ code: api.SpanStatusCode.ERROR, message: 'Fetch failed' });
         }
       } catch (e) {
