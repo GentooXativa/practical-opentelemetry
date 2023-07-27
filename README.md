@@ -8,6 +8,7 @@ Knowledge Sharing about OpenTelemetry
   - [How to run](#how-to-run)
   - [How to stop](#how-to-stop)
   - [Recommended Readings](#recommended-readings)
+  - [APIs used on this demo](#apis-used-on-this-demo)
 
 ## Description
 
@@ -57,3 +58,12 @@ You can use `CONTROL+C` at any time to stop it.
 - Obervability VS Monitoring VS Telemetry: https://cribl.io/blog/observability-vs-monitoring-vs-telemetry/
 - Observability VS Monitoring: https://www.ibm.com/cloud/blog/observability-vs-monitoring
 
+## APIs used on this demo
+
+All of this API are free to use, and some of them have limitations so after 1 or 2 runs you will get quota errors or something like that.
+
+- https://catfact.ninja/fact
+- https://api.chucknorris.io/jokes/random
+- https://official-joke-api.appspot.com/random_joke
+- https://api.kanye.rest/
+- https://ifconfig.me/all.json
